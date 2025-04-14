@@ -2,3 +2,4 @@
 alias dir='ls -alF'
 alias md='mkdir'
 alias rd='rm -rf'
+alias loadaliases='source .script/git.aliases;source .script/tools.aliases'
