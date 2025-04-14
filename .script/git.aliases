@@ -130,57 +130,76 @@ gitbmas() {
 # 3 : Increase Patch version by 1 for commit
 # 4 : Doesn't increase the version at all, this is for merge. Only changelog
 bumpversion() {
-	if [ "$#" -eq 2 ] ; then
-		if [ ! -f "$_verfile" ] ; then
-		  banner "File $_verfile does not exist, creating one"
-			echo "0.1.0" > .version
-		fi
-		if [ ! -f "$_changefile" ] ; then
-		  banner "File $_changefile does not exist, creating one"
-			touch .changelog
-		fi
-		_dotver=`cat $_verfile`
-    _arrver=(`echo $_dotver | tr '.' ' '`)
-    _vmajor=${_arrver[1]}
-    _vminor=${_arrver[2]}
-    _vpatch=${_arrver[3]}
-		_vsync="Commit: "
-	  curbranch=$(git status | grep "On branch" | awk -F' ' '{ print $3 }')
-		_prever="$curbranch."
-		if [ $1 -eq 1 ] ; then
-			_vmajor=$((_vmajor + 1))
-			_vminor=0
-			_vpatch=0
-			echo "Bumping major version from ${_dotver} to ${_vmajor}.${_vminor}.${_vpatch}"
-		elif [ $1 -eq 2 ] ; then
-			_vminor=$((_vminor + 1))
-			_vpatch=0
-			echo "Bumping minor version from ${_dotver} to ${_vmajor}.${_vminor}.${_vpatch}"
-		elif [ $1 -eq 3 ] ; then
-			_vpatch=$((_vpatch + 1))
-			echo "Bumping patch version from ${_dotver} to ${_vmajor}.${_vminor}.${_vpatch}"
-		elif [ $1 -eq 4 ] ; then
-			_vsync="Merge: "
-			echo "NO Bumping (sync) version from ${_dotver} to ${_vmajor}.${_vminor}.${_vpatch}"
-		else
-			bumpversion
-			return 1
-		fi
-		_newver="$_vmajor.$_vminor.$_vpatch"
-		echo "$_newver" > .version
-		echo "$_prever$_newver\t$_vsync$2\n$(cat $_changefile)" > $_changefile
-	else
-		echo "Syntax:"
-		echo "    bumpversion [1|2|3|4] \"Your commit message\""
-		echo "    1.2.3 - is Major.Minor.Patch respectively"
-		echo "    will add version by 1 (+1)"
-		echo "    1 - is for major version on commit"
-		echo "    2 - is for minor version on commit"
-		echo "    3 - is for patch version on commit"
-		echo "    4 - is for merging, no version changed. Changelog is added"
-    echo "numArgs $# >$1 $2 $0"
-	fi
+    if [ "$#" -eq 2 ]; then
+        # Initialize version file if missing
+        if [ ! -f "$_verfile" ]; then
+            banner "File $_verfile does not exist, creating one"
+            echo "0.1.0" > .version
+        fi
+
+        # Initialize changelog if missing
+        if [ ! -f "$_changefile" ]; then
+            banner "File $_changefile does not exist, creating one"
+            touch .changelog
+        fi
+
+        # Read and parse version - using alternative method without -a
+        _dotver=$(cat $_verfile)
+        _vmajor=$(echo "$_dotver" | cut -d. -f1)
+        _vminor=$(echo "$_dotver" | cut -d. -f2)
+        _vpatch=$(echo "$_dotver" | cut -d. -f3)
+
+        _vsync="Commit: "
+
+        # Get current branch (if in git repo)
+        if git rev-parse --git-dir > /dev/null 2>&1; then
+            curbranch=$(git branch --show-current 2>/dev/null || git rev-parse --abbrev-ref HEAD)
+            _prever="$curbranch."
+        else
+            _prever=""
+        fi
+
+        case $1 in
+            1)  # Major bump
+                _vmajor=$((_vmajor + 1))
+                _vminor=0
+                _vpatch=0
+                echo "Bumping major version from ${_dotver} to ${_vmajor}.${_vminor}.${_vpatch}"
+                ;;
+            2)  # Minor bump
+                _vminor=$((_vminor + 1))
+                _vpatch=0
+                echo "Bumping minor version from ${_dotver} to ${_vmajor}.${_vminor}.${_vpatch}"
+                ;;
+            3)  # Patch bump
+                _vpatch=$((_vpatch + 1))
+                echo "Bumping patch version from ${_dotver} to ${_vmajor}.${_vminor}.${_vpatch}"
+                ;;
+            4)  # No bump (merge)
+                _vsync="Merge: "
+                echo "NO Bumping (sync) version from ${_dotver} to ${_vmajor}.${_vminor}.${_vpatch}"
+                ;;
+            *)  # Invalid option
+                bumpversion
+                return 1
+                ;;
+        esac
+
+        _newver="$_vmajor.$_vminor.$_vpatch"
+        echo "$_newver" > .version
+        echo -e "$_prever$_newver\t$_vsync$2\n$(cat $_changefile)" > $_changefile
+    else
+        echo "Syntax:"
+        echo "    bumpversion [1|2|3|4] \"Your commit message\""
+        echo "    1.2.3 - is Major.Minor.Patch respectively"
+        echo "    1 - Major version bump (X.0.0)"
+        echo "    2 - Minor version bump (x.X.0)"
+        echo "    3 - Patch version bump (x.x.X)"
+        echo "    4 - No version bump (for merges)"
+        echo "numArgs $# >$1 $2 $0"
+    fi
 }
+
 
 ###############
 # Functions: commit, merge to [target branch] then push to remote
