@@ -151,13 +151,17 @@ bumpversion() {
 			_vmajor=$((_vmajor + 1))
 			_vminor=0
 			_vpatch=0
+			echo "Bumping major version from ${_dotver} to ${_vmajor}.${_vminor}.${_vpatch}"
 		elif [ $1 -eq 2 ] ; then
 			_vminor=$((_vminor + 1))
 			_vpatch=0
+			echo "Bumping minor version from ${_dotver} to ${_vmajor}.${_vminor}.${_vpatch}"
 		elif [ $1 -eq 3 ] ; then
 			_vpatch=$((_vpatch + 1))
+			echo "Bumping patch version from ${_dotver} to ${_vmajor}.${_vminor}.${_vpatch}"
 		elif [ $1 -eq 4 ] ; then
 			_vsync="Merge: "
+			echo "NO Bumping (sync) version from ${_dotver} to ${_vmajor}.${_vminor}.${_vpatch}"
 		else
 			bumpversion
 			return 1
