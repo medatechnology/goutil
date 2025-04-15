@@ -134,7 +134,8 @@ func (t *TTLMap) Delete(key string) {
 	t.m.Delete(key)
 }
 
-// cleanup periodically removes expired items from the map.
+// Cleanup periodically removes expired items from the map.
+// This is the ticker for checking expiration of the map
 func (t *TTLMap) cleanup() {
 	for {
 		select {

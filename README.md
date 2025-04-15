@@ -23,6 +23,7 @@ GoUtil is a comprehensive collection of utility functions for Go projects. This 
   - [Environment Variables](#environment-variables)
   - [JWT and Encryption](#jwt-and-encryption)
   - [Random Generators](#random-generators)
+  - [Performance Metrics](#performance-metrics)
 - [Contributing](#contributing)
 - [License](#license)
 
@@ -405,6 +406,43 @@ token := encryption.NewRandomToken() // "KwSysDpxcBU9FNhGkn2dCf"
 // Generate longer random token
 longToken := encryption.NewRandomTokenIterate(3) // Concatenates 3 random tokens
 ```
+
+### Performance Metrics
+
+The `metrics` package provides a stopwatch utility for measuring execution time of operations:
+
+```go
+import "github.com/medatechnology/goutil/metrics"
+
+// Start a timer with message and visual ticker (dots every 250ms)
+watch := metrics.StartTimeIt("Processing data", 250)
+// Output starts: Processing data....
+
+// Do some work
+time.Sleep(1 * time.Second)
+
+// Stop timer and print message with elapsed time
+elapsed := metrics.StopTimeItPrint(watch, "Complete")
+// Output: Processing data.... Complete (1.002s)
+
+// For silent timing (no output during execution)
+watch = metrics.StartTimeIt("", 0)
+
+// Do work
+complexOperation()
+
+// Get elapsed time without printing
+elapsed = metrics.StopTimeIt(watch)
+fmt.Printf("Operation took %v\n", elapsed)
+
+// Or print custom message with elapsed time
+watch = metrics.StartTimeIt("", 0)
+operation()
+elapsed = metrics.StopTimeItPrint(watch, "Operation finished")
+// Output: Operation finished (243ms)
+```
+
+The stopwatch utility is thread-safe and can be used to track multiple concurrent operations.
 
 ## Contributing
 

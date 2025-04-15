@@ -18,14 +18,15 @@ var (
 // This is wrapper for go standard error
 type MedaError struct {
 	Code           int
-	Message        string // usually for logging
-	ResponseString string
+	Message        string // usually for logging or console print
+	ResponseString string // usually for API return message
 	Data           interface{}
 	FunctionName   string
 	IsLogged       bool
 	Err            error // original error, if this is nil, then MedaError is used for logging only
 }
 
+// Constructor with complete variables
 func NewMedaErr(code int, message, respString string, data interface{}) MedaError {
 	if respString == "" {
 		respString = message
@@ -38,10 +39,12 @@ func NewMedaErr(code int, message, respString string, data interface{}) MedaErro
 	}
 }
 
+// Constructor with only message, rest are default value
 func NewMedaErrString(message string) MedaError {
 	return NewMedaErr(STANDARD_ERROR, message, message, nil)
 }
 
+// Constructor with Printf format
 func NewMedaErrStringFormat(format string, a ...any) MedaError {
 	msg := fmt.Sprintf(format, a...)
 	return NewMedaErr(STANDARD_ERROR, msg, msg, nil)

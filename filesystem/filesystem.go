@@ -45,6 +45,7 @@ func Dir(path, filter string) []fs.DirEntry {
 	} else {
 		return files
 	}
+	// DEBUGGING:
 	// for _, file := range files {
 	// 	fmt.Println(file.Name(), file.IsDir())
 	// }

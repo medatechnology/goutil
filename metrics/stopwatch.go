@@ -21,7 +21,7 @@ import (
 //
 
 type TimeIt struct {
-	ID         int64
+	ID         int64 // ID to match the StopTimer
 	Message    string
 	Start      time.Time
 	WithTicker bool
@@ -36,6 +36,10 @@ const (
 
 var watches sync.Map // Replaces the original map
 
+// Start timer (stopwatch) returns ID for the timer
+// If message="" (empty string) then it doesn't display
+// anything and ticker automatically disabled!
+// If ticker speed is 0, then use default value
 func StartTimeIt(message string, tickerSpeed int) int64 {
 	id := rand.Int63()
 	withTicker := false
@@ -75,6 +79,7 @@ func StartTimeIt(message string, tickerSpeed int) int64 {
 	return id
 }
 
+// Stop the timer without printing anything
 func StopTimeIt(id int64) time.Duration {
 	val, ok := watches.Load(id) // Thread-safe load
 	if !ok {
@@ -94,6 +99,8 @@ func StopTimeIt(id int64) time.Duration {
 	return elapsed
 }
 
+// Stop timer with printing message, usually "Done"
+// Output: ..... Done (duration) -- duration is with appropriate unit
 // If message == "" then not printing anything
 func StopTimeItPrint(id int64, message string) time.Duration {
 	elapsed := StopTimeIt(id)

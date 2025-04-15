@@ -37,6 +37,8 @@ func CombineToStringWithSpace(msgs ...any) string {
 	// return strings.Trim(aa, " ")
 	return CombineToStringWithSeparator(" ", msgs)
 }
+
+// Combine array of strings with seperator (sep)
 func CombineToStringWithSeparator(sep string, msgs ...any) string {
 	aa := ""
 	for _, v := range msgs {

@@ -8,6 +8,8 @@ import (
 
 type TimeConvertSetting string
 
+// TODO: This was created originally for PocketBase, we need to change
+// this to more standard format.
 const (
 	// not used
 	DATE_ONLY     TimeConvertSetting = "DateOnly"
@@ -205,11 +207,8 @@ func ConvertManyTimeFormatToGoLangTime(str string) (time.Time, error) {
 // Add days into string date, can do negative days as well to substract dateStr by days
 // dateStr = mm/dd/yyyy  and return format is the same
 func AddDaysToStringDate(dateStr string, days int) string {
-	// fmt.Println("======= dateStr:", dateStr, " add:", days)
 	t := DateStrToTime(dateStr)
-	// fmt.Println("======= before tmp:", t)
 	t = t.AddDate(0, 0, days)
-	// fmt.Println("======= after tmp:", t, ", format:", t.Format(time.DateOnly))
 	return t.Format(time.DateOnly)
 }
 
@@ -230,6 +229,7 @@ func AddMinutesToDateTimeStringAsGoTime(datetimeStr string, minutes int) time.Ti
 }
 
 // Convert int duration to time string : now + duration
+// Output is RFC3339
 func TimeStringFromNow(duration int) string {
 	return time.Now().Add(time.Second * time.Duration(int64(duration))).Format(time.RFC3339)
 }

@@ -1,5 +1,6 @@
 package object
 
+// Define helper for number declaration/interface
 type Signed interface {
 	~int | ~int8 | ~int16 | ~int32 | ~int64
 }
@@ -16,11 +17,15 @@ type Number interface {
 	Integer | Float
 }
 
+// Use var so later we can change it, it is crude for now
+// but can do: object.THOUSAND_SEPARATOR='.' before calling
+// any of the number methods
 var (
 	THOUSAND_SEPARATOR byte = ','
 	DECIMAL_SEPARATOR  byte = '.'
 )
 
+// Return the maximum, Minimum values and index in the array of integer
 func MaxMinIntArray(arr []int) (max, min, maxindex, minindex int) {
 	max = -1
 	min = 2147483647
@@ -40,17 +45,17 @@ func MaxMinIntArray(arr []int) (max, min, maxindex, minindex int) {
 	return
 }
 
-// return true if port exists in arr
-func ExistInArrayInt(port int, arr []int) bool {
+// Return true if num exists in arr
+func ExistInArrayInt(num int, arr []int) bool {
 	for _, r := range arr {
-		if r == port {
+		if r == num {
 			return true
 		}
 	}
 	return false
 }
 
-// Simpler ABS func, no need to import math. Need Number Type
+// Simpler generic ABS func, no need to import math. Need Number Type
 func Abs[T Number](num T) T {
 	if num < 0 {
 		return -num
@@ -75,7 +80,7 @@ func Abs[T Number](num T) T {
 
 // PLEASE NOTE TO USE THIS ONLY IF YOU ARE SURE THAT THE STRING IS INTEGER
 // Mostly only to convert simple string index back to positive integer
-// NOTE: only works on decimals and positive, so string "-123" will not work
+// NOTE: only works on decimals and POSITIVE value, so string "-123" will not work
 func IntPlus(str string, zeroValue int) int {
 	if len(str) < 1 {
 		return zeroValue

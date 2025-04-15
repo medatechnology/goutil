@@ -42,7 +42,10 @@ func GenerateDefaultOTP() string {
 }
 
 // Get random number for OTP (6 digit format with dash)
-// Ex: 57-03
+// Generate random number in form of string usually used for OTP
+// The digit is number of digit, set is how many sets are there
+// Ex: 57-03   ==> digit=2, set=2
+// .   820-587 ==> digit=3, set=2
 func GenerateOTP(digit, set int, separator string) string {
 	// Generate new seed everytime we call the random function.
 	// NOTE: might not need to do this, I think from go 1.20 the seed is automatically

@@ -31,9 +31,6 @@ func GetAuthorizationFromHeader(authstring string) (string, string) {
 // Parse the header manually then get the JWT. This function is needed to check
 // if JWT is valid but expired, then we use it to renew/extends the expiration
 func GetJWTClaimMapFromTokenString(t, JWTKey string) (jwt.MapClaims, error) {
-	// p := new(jwt.Parser)
-	// p.SkipClaimsValidation = true
-	// DebugLog.Println("GetJWTClaimFromTokenString: Start, t = ", t)
 	oldToken, err := jwt.Parse(t, func(token *jwt.Token) (interface{}, error) {
 		return []byte(JWTKey), nil
 	})
