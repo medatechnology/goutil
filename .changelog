@@ -1,7 +1,6 @@
+main.0.0.6	Commit: Tidying up changelog and helptest.sh. Also last changes of JWE was not saved.
 main.0.0.5	Commit: Added metrics on readme and added comments
-main.0.0.4	Commit: Added metrics stopwatch
 main.0.0.4	Commit: Added metrics stopwatch
 main.0.0.3	Commit: Added readme and fix the versioning releases
 main.0.0.2	Commit: Added medattlmap
 main.0.1.1	Commit: Initialized goutil
-main.0.1.1	Commit: Init go util

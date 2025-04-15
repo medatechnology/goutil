@@ -13,7 +13,6 @@ import (
 
 // Standard JWE format
 // BASE64URL(UTF8(Protected Header)).BASE64URL(Encrypted Key).BASE64URL(IV).BASE64URL(Ciphertext).BASE64URL(Authentication Tag)
-
 func CreateJWE(payload []byte, key []byte) (string, error) {
 	block, err := aes.NewCipher(key)
 	if err != nil {

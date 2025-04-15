@@ -1,12 +1,13 @@
 #!/bin/bash
 EMAIL=$1
 
-
+# Init golang
+# go mod init github.com/medatechnology/goutil
 
 # Generate ssh key if  you don't already have.
 # then go to github --> settings --> ssh key and 
 # add the [sshfile].pub there (by pasting it)
-ssh-keygen -t ed25519 -C "${EMAIL}"
+# ssh-keygen -t ed25519 -C "${EMAIL}"
 
 # Check if 
 git remote -v
