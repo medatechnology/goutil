@@ -361,6 +361,9 @@ func mapToStructUniversal[T any](dict map[string]interface{}, tagfunc func(refle
 
 // Utility function for comprehensive and flexible MapToStruct
 // setFieldValue sets the value of a struct field.
+// It handles pointers, structs, time.Time, and other types.
+// It also handles nested structs and maps.
+// The tagfunc is used to get the tag name for the field.
 func setFieldValue(fieldValue reflect.Value, value interface{}, tagfunc func(reflect.StructField) string) {
 	switch fieldValue.Kind() {
 	case reflect.Ptr:

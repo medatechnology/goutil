@@ -27,10 +27,17 @@ const (
 	White        = "\033[97m"
 )
 
+// Color represents a color code for terminal output, for readibility
 type Color struct {
 	Code string
 }
 
+// Predefined colors for convenience as variables (can be changed)
+// These are the colors that can be used directly
+// You can use these colors directly in your code
+// Example: fmt.Println(ColorRed.Code + "This is red text" + Reset)
+// You can also use the Color struct to create your own colors
+// Example: myColor := Color{Code: "\033[38;5;82m"} // Custom color
 var (
 	ColorRed          = Color{Red}
 	ColorGreen        = Color{Green}
@@ -48,8 +55,17 @@ var (
 	ColorLightCyan    = Color{LightCyan}
 	ColorWhite        = Color{White}
 	ColorNothing      = Color{""}
+	ColorReset        = Color{Reset}
 )
 
+// BoxChars represents the characters used to draw a box
+// This is used to draw a box around the text
+// You can change these characters to use different styles
+// Example: BoxChars{TopLeft: "╔", TopRight: "╗", BottomLeft: "╚", BottomRight: "╝", Horizontal: "═", Vertical: "║"}
+// Example: BoxChars{TopLeft: "┌", TopRight: "┐", BottomLeft: "└", BottomRight: "┘", Horizontal: "─", Vertical: "│"}
+// Example: BoxChars{TopLeft: "╭", TopRight: "╮", BottomLeft: "╰", BottomRight: "╯", Horizontal: "─", Vertical: "│"}
+// Example: BoxChars{TopLeft: "┏", TopRight: "┓", BottomLeft: "┗", BottomRight: "┛", Horizontal: "━", Vertical: "┃"}
+// Example: BoxChars{TopLeft: "╓", TopRight: "╖", BottomLeft: "╙", BottomRight: "╜", Horizontal: "─", Vertical: "│"}
 type BoxChars struct {
 	TopLeft     string
 	TopRight    string
@@ -59,6 +75,13 @@ type BoxChars struct {
 	Vertical    string
 }
 
+// UnicodeBox is the default box characters used for drawing boxes
+// You can change this to use different styles
+// Example: UnicodeBox = BoxChars{TopLeft: "╔", TopRight: "╗", BottomLeft: "╚", BottomRight: "╝", Horizontal: "═", Vertical: "║"}
+// Example: UnicodeBox = BoxChars{TopLeft: "╭", TopRight: "╮", BottomLeft: "╰", BottomRight: "╯", Horizontal: "─", Vertical: "│"}
+// Example: UnicodeBox = BoxChars{TopLeft: "┏", TopRight: "┓", BottomLeft: "┗", BottomRight: "┛", Horizontal: "━", Vertical: "┃"}
+// Example: UnicodeBox = BoxChars{TopLeft: "╓", TopRight: "╖", BottomLeft: "╙", BottomRight: "╜", Horizontal: "─", Vertical: "│"}
+// Example: UnicodeBox = BoxChars{TopLeft: "┌", TopRight: "┐", BottomLeft: "└", BottomRight: "┘", Horizontal: "─", Vertical: "│"}
 var UnicodeBox = BoxChars{
 	TopLeft:     "┌",
 	TopRight:    "┐",
@@ -68,13 +91,16 @@ var UnicodeBox = BoxChars{
 	Vertical:    "│",
 }
 
+// Colored is a function that takes a string and a color code and returns the string with the color code applied
+// This is used to colorize the text
+// Example: Colored("Hello World", ColorRed.Code) // This will return the string with red color code
 func Colored(text string, color Color) string {
 	return color.Code + text + Reset
 }
 
+// Used to print 2 columns of key-value pairs in a box, between left and right border
 // KeyValue represents a key-value pair
 // TODO: change this to KeyValueStrings and maybe put them in object?
-// KeyValue represents a key-value pair
 type KeyValue struct {
 	Key       string
 	Value     string
@@ -98,11 +124,11 @@ func PrintfColor(format string, col Color, a ...any) {
 }
 
 // Just alias to make the code shorter
-func Content(column, empty bool, k interface{}, v interface{}) KeyValue {
+func Content(singleColumn, empty bool, k interface{}, v interface{}) KeyValue {
 	keyStr := fmt.Sprintf("%v", k) // Using fmt.Sprintf to convert interface{} to string
 	valueStr := fmt.Sprintf("%v", v)
 
-	return KeyValue{Key: keyStr, Value: valueStr, OneColumn: column, EmptyLine: empty}
+	return KeyValue{Key: keyStr, Value: valueStr, OneColumn: singleColumn, EmptyLine: empty}
 }
 
 func PrintBoxHeadingContent(heading []string, headingColors []Color, content []KeyValue, keyColor Color, valueColor Color) {

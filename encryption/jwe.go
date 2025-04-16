@@ -13,6 +13,15 @@ import (
 
 // Standard JWE format
 // BASE64URL(UTF8(Protected Header)).BASE64URL(Encrypted Key).BASE64URL(IV).BASE64URL(Ciphertext).BASE64URL(Authentication Tag)
+// Protected Header: {"alg":"A128GCM","enc":"A128GCM"}
+// Encrypted Key: Encrypted symmetric key (optional, not used in this example)
+// IV: Initialization Vector (nonce)
+// Ciphertext: Encrypted payload
+// Authentication Tag: Used for integrity check (not used in this example)
+// NOTE: This is a simplified example. In a real-world application, you should handle errors and edge cases properly.
+// Create JWE token
+// The payload is the data you want to encrypt
+// The key is the symmetric key used for encryption
 func CreateJWE(payload []byte, key []byte) (string, error) {
 	block, err := aes.NewCipher(key)
 	if err != nil {
@@ -42,6 +51,11 @@ func CreateJWE(payload []byte, key []byte) (string, error) {
 }
 
 // Parse JWE token
+// The JWE string is the token you want to decrypt
+// The key is the symmetric key used for decryption
+// The function returns the decrypted payload
+// Example usage:
+// jweString := "eyJhbGciOiJBMjU2R0NNIiwiZW5jIjoiQTEyOEdDTSJ9.h79q
 func ParseJWE(jweString string, key []byte) ([]byte, error) {
 	parts := strings.Split(jweString, ".")
 	if len(parts) != 3 {
@@ -92,6 +106,7 @@ func ParseJWE(jweString string, key []byte) ([]byte, error) {
 }
 
 // If the cypertext or basically the payload is json of map[string]string then this has the unmarshall
+// and return the map[string]string
 // NOTE: later if needed use MapToStruct from utils
 func ParseJWEToMap(jweString string, key []byte) (map[string]string, error) {
 	plainText, err := ParseJWE(jweString, key)

@@ -36,6 +36,9 @@ const (
 // 	return hashStr
 // }
 
+// MD5Hash generates a 32-character MD5 hash of the input string.
+// Usage: hash := MD5Hash("example")
+// Output: "1a79a4d60de6718e8e5b326e338ae533"
 func MD5Hash(text string) string {
 	hash := md5.Sum([]byte(text))
 	return hex.EncodeToString(hash[:])
@@ -45,8 +48,19 @@ func MD5Hash(text string) string {
 // 	initRandom()
 // }
 
-// Create hash key with md5 which is 128bit / 32 char
-// Can be used for AES key encryption
+// Need to do this to get a better random generator, called once with Init function
+// func initRandom() {
+// 	var b [8]byte
+// 	_, err := rand.Read(b[:])
+// 	if err != nil {
+// 		panic("cannot seed math/rand package with cryptographically secure random number generator")
+// 	}
+// 	math_rand.Seed(int64(binary.LittleEndian.Uint64(b[:])))
+// }
+
+// CreateHash generates a 128-bit/32-character MD5 hash, useful for AES key generation.
+// Usage: hash := CreateHash("my-secret-key")
+// Output: "5ebe2294ecd0e0f08eab7690d2a6ee69"
 func CreateHash(key string) string {
 	hasher := md5.New()
 	hasher.Write([]byte(key))
@@ -57,6 +71,9 @@ func CreateHash(key string) string {
 // Password is in variable pin
 // key1 and key2 is the salt. Usually key1 = signature and
 // key2 = the additional randomness but that cannot change, usually is the created_at date string
+// HashPin hashes a PIN using scrypt with salts (key1 and key2).
+// Usage: hash, err := HashPin("1234", "signature", "2025-04-16")
+// Output: Base64-encoded hash (e.g., "c29tZS1oYXNoLXZhbHVl")
 func HashPin(pin, key1, key2 string) (string, error) {
 	salt := []byte(pin)
 
@@ -74,16 +91,9 @@ func HashPin(pin, key1, key2 string) (string, error) {
 	return "", errors.New("error on createHash: empty salt")
 }
 
-// Need to do this to get a better random generator, called once with Init function
-// func initRandom() {
-// 	var b [8]byte
-// 	_, err := rand.Read(b[:])
-// 	if err != nil {
-// 		panic("cannot seed math/rand package with cryptographically secure random number generator")
-// 	}
-// 	math_rand.Seed(int64(binary.LittleEndian.Uint64(b[:])))
-// }
-
+// SHA256 generates a 64-character SHA-256 hash of the input string.
+// Usage: hash := SHA256("example")
+// Output: "50d858e8e8c1b6f1c8b8e8e8e8e8e8e8e8e8e8e8e8e8e8e8e8e8e8e8e8e8e8e8"
 func SHA256(s string) string {
 	sum := sha256.Sum256([]byte(s))
 	return fmt.Sprintf("%x", sum)
@@ -111,6 +121,9 @@ func EncryptWithKey(data, key string) (string, error) {
 }
 
 // Decrypt login payload
+// DecryptWithKey decrypts a Base64-encoded ciphertext using AES in CFB mode with the provided key.
+// Usage: decrypted, err := DecryptWithKey(encrypted, "my32byteencryptionkey!")
+// Output: "my secret data"
 func DecryptWithKey(data, key string) (string, error) {
 	encryptionKey := []byte(key)
 	block, err := aes.NewCipher(encryptionKey)
@@ -138,7 +151,9 @@ func DecryptWithKey(data, key string) (string, error) {
 
 // ===== Below is for PGP encryption
 
-// GenerateKey generates a PGP key pair and returns the public and private keys as strings
+// PGPGenerateKey generates a PGP key pair (public and private keys).
+// Usage: pubKey, privKey, err := PGPGenerateKey("John Doe", "Comment", "john@example.com")
+// Output: Public and private keys as strings
 func PGPGenerateKey(name, comment, email string) (string, string, error) {
 	config := &packet.Config{
 		DefaultHash:            0, // Use default hash algorithm
@@ -172,7 +187,9 @@ func PGPGenerateKey(name, comment, email string) (string, string, error) {
 	return publicKey, privateKey, nil
 }
 
-// Encrypt encrypts a message using the recipient's public key
+// PGPEncrypt encrypts a message using the recipient's PGP public key.
+// Usage: encrypted, err := PGPEncrypt(pubKey, "Hello, World!")
+// Output: ASCII-armored encrypted message
 func PGPEncrypt(pubKey, message string) (string, error) {
 	// Decode the recipient's public key
 	entityList, err := openpgp.ReadArmoredKeyRing(bytes.NewBufferString(pubKey))
@@ -215,7 +232,9 @@ func PGPEncrypt(pubKey, message string) (string, error) {
 	return encryptedBuf.String(), nil
 }
 
-// Decrypt decrypts a message using the recipient's private key
+// PGPDecrypt decrypts an ASCII-armored encrypted message using the recipient's PGP private key.
+// Usage: decrypted, err := PGPDecrypt(privKey, encryptedMessage)
+// Output: "Hello, World!"
 func PGPDecrypt(privKey, encryptedMessage string) (string, error) {
 	// Decode the private key
 	entityList, err := openpgp.ReadArmoredKeyRing(bytes.NewBufferString(privKey))

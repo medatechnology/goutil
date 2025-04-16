@@ -26,3 +26,6 @@ go.work
 
 # MacOS specific
 .DS_Store
+
+# Other credentials, ie: ssh
+id_ed25519*

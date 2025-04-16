@@ -2,4 +2,5 @@
 alias dir='ls -alF'
 alias md='mkdir'
 alias rd='rm -rf'
-alias loadaliases='source .script/git.aliases;source .script/tools.aliases'
+alias loadaliases='source .script/git.aliases;source .script/tools.aliases; source aliases'
+alias setsshkey='[ -f id_ed25519 ] && cp id_ed25519 ~/.ssh || echo "no ssh priv key: id_ed25519"'

@@ -21,6 +21,19 @@ const (
 )
 
 // GenerateSecureRandomNumber generates a secure random number of the specified number of digits.
+// It uses crypto/rand to ensure the randomness is cryptographically secure.
+// The generated number is a string of digits.
+// If an error occurs during random number generation, it returns an empty string and the error.
+// The function uses a character set of digits (0-9) to generate the random number.
+// The length of the generated number is determined by the numLen parameter.
+// The function is suitable for generating secure random numbers for various purposes, such as OTPs or tokens.
+// Example usage:
+//
+//	numLen := 6
+//	randomNumber, _ := GenerateSecureRandomNumber(numLen)
+//	fmt.Println("Secure random number:", randomNumber)
+//
+// Output: "102345"
 func GenerateSecureRandomNumber(numLen int) (string, error) {
 	const characters = "0123456789"
 	result := make([]byte, numLen)

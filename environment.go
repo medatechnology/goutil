@@ -29,8 +29,8 @@ type ComparisonFunction[T comparable] func(a, b T) bool
 // // Declare the New Config function to include ...ClientConfigOption
 // func NewClientConfig(options ...ClientConfigOption) ClientConfig {
 // 	config := ClientConfig{
-// 		ServerURL:   utils.GetEnv("SURESQL_SERVER_URL", "http://localhost:8080"),
-// 		APIKey:      utils.GetEnv("SURESQL_API_KEY", "development_api_key"),
+// 		ServerURL:   utils.GetEnv("SERVER_URL", "http://localhost:8080"),
+// 		APIKey:      utils.GetEnv("API_KEY", "development_api_key"),
 // 		HTTPTimeout: ValueOrDefault(time.Duration(tmpTimeout)*time.Second, DEFAULT_TIMEOUT, DurationBiggerThanZero),
 // 	}
 // 	// Run all the options
@@ -59,10 +59,10 @@ type ComparisonFunction[T comparable] func(a, b T) bool
 // 		config.HTTPClientConfig = val
 // 	}
 // }
-// // -- call the New Config with options
+// -- call the New Config with options
 // config := NewClientConfig(
 //   WithApiKey("MY_KEY"),
-// 	WithServerURL("http://localhost:80"),
+//   WithServerURL("http://localhost:80"),
 // )
 
 var (
@@ -85,6 +85,10 @@ func LoadEnvEach(envFiles ...string) {
 	}
 }
 
+// LoadEnvAll loads environment variables from .env file and optional additional files.
+// This will load all the files in the order they are provided, skipping any existing
+// variables with the same name. If a file does not exist, it will be ignored without error.
+// This is the default behavior of godotenv.Load().
 func LoadEnvAll(envFiles ...string) {
 	err := godotenv.Load(envFiles...)
 	if err != nil {
@@ -96,7 +100,6 @@ func LoadEnvAll(envFiles ...string) {
 // LoadEnvironment loads environment variables from .env file and optional additional files.
 // This use the Overload() means it will overwrite the variables if already exist, Load() won't
 func ReloadEnvEach(additionalFiles ...string) {
-
 	// Load default .env file even if it doesn't exist
 	godotenv.Overload()
 	// if err := godotenv.Overload(); err != nil {
@@ -181,11 +184,14 @@ func DurationBiggerThanZero(a, b time.Duration) bool {
 // Used to get value usually from environment if value is true via ComparisonFunction
 // use value, if not use preset (or default value)
 // Ex:
-// ValueOrDefault(time.Duration(timeout)*time.Second, DEFAULT_TIMEOUT,
-// //             DurationBiggerThanZero),
+// ValueOrDefault(time.Duration(timeout)*time.Second, DEFAULT_TIMEOUT, DurationBiggerThanZero),
 //
 // Set with maxIdle if bigger than 0 or use DEFAULT_MAX_IDLE
 // MaxIdleConns = ValueOrDefault(maxIdle, DEFAULT_MAX_IDLE_CONNECTIONS, IntBiggerThanZero),
+//
+// Set with maxIdle if it's bigger than DEFAULT_MAX_IDLE
+// or use DEFAULT_MAX_IDLE
+// MaxIdleConns = ValueOrDefault(maxIdle, DEFAULT_MAX_IDLE, IntABiggerThanB),
 func ValueOrDefault[T comparable](value, preset T, compF ComparisonFunction[T]) T {
 	if compF(value, preset) {
 		return value
