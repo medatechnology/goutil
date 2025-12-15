@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
+	"io"
 	"io/ioutil"
 	"net/http"
 	"net/url"
@@ -40,6 +41,10 @@ type HttpClient interface {
 	SetHeader(headers map[string][]string) *httpClient
 	SetQueryParams(params map[string]string) *httpClient
 	SetBasicAuth(username, password string) *httpClient
+	// PostStream sends a POST request and returns raw response for streaming
+	PostStream(url string, data any) (*http.Response, error)
+	// GetStream sends a GET request and returns raw response for streaming
+	GetStream(url string) (*http.Response, error)
 }
 
 func (h *httpClient) Post(urll string, body interface{}, result interface{}, errorResponse interface{}) (StatusCode, error) {
@@ -122,6 +127,73 @@ func (h *httpClient) Post(urll string, body interface{}, result interface{}, err
 	}
 	response.Body.Close()
 	return StatusCode(response.StatusCode), nil
+}
+
+// PostStream sends a POST request and returns the raw *http.Response.
+// The caller is responsible for reading and closing the response body.
+// This is useful for SSE (Server-Sent Events) and streaming APIs.
+func (h *httpClient) PostStream(url string, data any) (*http.Response, error) {
+	var body io.Reader
+	if data != nil {
+		jsonData, err := json.Marshal(data)
+		if err != nil {
+			return nil, err
+		}
+		body = bytes.NewReader(jsonData)
+	}
+
+	req, err := http.NewRequest("POST", url, body)
+	if err != nil {
+		return nil, err
+	}
+
+	// Apply stored headers
+	req.Header = h.headers
+
+	// Apply query params if any
+	if len(h.params) > 0 {
+		q := req.URL.Query()
+		for key, value := range h.params {
+			q.Add(key, value)
+		}
+		req.URL.RawQuery = q.Encode()
+	}
+
+	// Apply basic auth if set
+	if h.useBasicAuth {
+		req.SetBasicAuth(h.basicAuthData.Username, h.basicAuthData.Password)
+	}
+
+	return h.client.Do(req)
+}
+
+// GetStream sends a GET request and returns the raw *http.Response.
+// The caller is responsible for reading and closing the response body.
+// This is useful for SSE (Server-Sent Events) and streaming APIs.
+func (h *httpClient) GetStream(url string) (*http.Response, error) {
+	req, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	// Apply stored headers
+	req.Header = h.headers
+
+	// Apply query params if any
+	if len(h.params) > 0 {
+		q := req.URL.Query()
+		for key, value := range h.params {
+			q.Add(key, value)
+		}
+		req.URL.RawQuery = q.Encode()
+	}
+
+	// Apply basic auth if set
+	if h.useBasicAuth {
+		req.SetBasicAuth(h.basicAuthData.Username, h.basicAuthData.Password)
+	}
+
+	return h.client.Do(req)
 }
 
 func (h *httpClient) Get(urll string, result interface{}, errorResponse interface{}) (StatusCode, error) {
