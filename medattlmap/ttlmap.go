@@ -52,7 +52,7 @@ const (
 // Value can be anything at this point, can be struct as well...
 type item struct {
 	value      interface{}
-	expiration int64 // Unix timestamp for expiration
+	expiration int64 // Unix MILLISECONDS for expiration (put/get/touch/cleanup all compare in ms)
 }
 
 type TTLMap struct {
@@ -93,7 +93,7 @@ func (t *TTLMap) Put(key string, ttl time.Duration, value interface{}) {
 	if ttl == 0 {
 		optional = t.ttl
 	}
-	expiration := time.Now().Add(optional).Unix()
+	expiration := time.Now().Add(optional).UnixMilli()
 	t.m.Store(key, &item{value: value, expiration: expiration})
 }
 
@@ -117,11 +117,34 @@ func (t *TTLMap) Len() int {
 	return i
 }
 
+// Touch extends the expiration of a live item by the map's TTL, making the
+// TTL behave as an idle timeout ("expires after N of inactivity") for the
+// touched key instead of "expires N after creation". Returns true if the item
+// was live and got extended; false if it was missing or already expired
+// (expired items are deleted lazily, same as Get).
+//
+// It stores a NEW item rather than mutating the old one, so concurrent
+// cleanup/Get readers never observe a half-updated expiration.
+//
+// Maps that must keep absolute expiry (e.g. auth-token maps) simply never
+// call Touch — Get semantics are unchanged.
+func (t *TTLMap) Touch(key string) bool {
+	if v, ok := t.m.Load(key); ok {
+		it := v.(*item)
+		if time.Now().UnixMilli() < it.expiration {
+			t.m.Store(key, &item{value: it.value, expiration: time.Now().Add(t.ttl).UnixMilli()})
+			return true
+		}
+		t.Delete(key) // Delete if expired
+	}
+	return false
+}
+
 // Get retrieves an item from the map if it exists and is not expired.
 func (t *TTLMap) Get(key string) (interface{}, bool) {
 	if v, ok := t.m.Load(key); ok {
 		it := v.(*item)
-		if time.Now().Unix() < it.expiration {
+		if time.Now().UnixMilli() < it.expiration {
 			return it.value, true
 		}
 		t.Delete(key) // Delete if expired
@@ -140,7 +163,7 @@ func (t *TTLMap) cleanup() {
 	for {
 		select {
 		case <-t.ticker.C:
-			now := time.Now().Unix()
+			now := time.Now().UnixMilli()
 			t.m.Range(func(key, value interface{}) bool {
 				it := value.(*item)
 				if now >= it.expiration {
